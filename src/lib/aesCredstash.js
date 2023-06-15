@@ -67,7 +67,7 @@ export const openAesCtrLegacy = async (keyService, record) => {
     const digestMethod = record.digest || DEFAULT_DIGEST;
     const ciphertext = Buffer.from(record.contents, "base64");
     const hmac = (_a = record.hmac.value) !== null && _a !== void 0 ? _a : record.hmac;
-    const expectedHmac = hmac instanceof ArrayBuffer
+    const expectedHmac = hmac instanceof Uint8Array
         ? Buffer.from(hmac).toString("ascii")
         : hmac;
     return openAesCtr(key, LEGACY_NONCE, ciphertext, expectedHmac, digestMethod, record.name);
