@@ -39,6 +39,3 @@ node_modules
 #Test results folder
 test/results
 /package-lock.json
-
-src/**/*.d.ts
-src/**/*.js
