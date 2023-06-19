@@ -1,10 +1,10 @@
-import { DeleteItemCommandOutput } from '@aws-sdk/client-dynamodb';
-import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
-import { Configuration, GetAllSecrets, GetAllVersions, GetHighestVersionResponse, GetSecret, NameAndVersionOpts, NameOpts, Opts, PutSecret, QueryOpts } from './types';
+import { DeleteItemCommandOutput } from "@aws-sdk/client-dynamodb";
+import { PutCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { Configuration, GetAllSecrets, GetAllVersions, GetHighestVersionResponse, GetSecret, NameAndVersionOpts, NameOpts, Opts, PutSecret, QueryOpts } from "./types";
 export declare class CredStash {
     #private;
     readonly paddedInt: (i: number) => string;
-    constructor({ kmsOpts, dynamoOpts, }?: Configuration);
+    constructor({ kmsOpts, dynamoOpts }?: Configuration);
     /**
      * Retrieve the highest version of `name` in the table
      */

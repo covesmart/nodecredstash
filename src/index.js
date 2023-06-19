@@ -10,16 +10,16 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _CredStash_kmsClient, _CredStash_ddb;
-import { KMSClient } from '@aws-sdk/client-kms';
-import { ConditionalCheckFailedException, DynamoDBClient, } from '@aws-sdk/client-dynamodb';
-import debugFn from 'debug';
-import { DynamoDB } from './lib/dynamoDb';
-import { paddedInt, sanitizeVersion, sortSecrets } from './lib/utils';
-import { KeyService } from './lib/keyService';
-import { sealAesCtrLegacy, openAesCtrLegacy } from './lib/aesCredstash';
-const debug = debugFn('credStash');
+import { KMSClient } from "@aws-sdk/client-kms";
+import { ConditionalCheckFailedException, DynamoDBClient, } from "@aws-sdk/client-dynamodb";
+import debugFn from "debug";
+import { DynamoDB } from "./lib/dynamoDb";
+import { paddedInt, sanitizeVersion, sortSecrets } from "./lib/utils";
+import { KeyService } from "./lib/keyService";
+import { sealAesCtrLegacy, openAesCtrLegacy } from "./lib/aesCredstash";
+const debug = debugFn("credStash");
 export class CredStash {
-    constructor({ kmsOpts = {}, dynamoOpts = {}, } = {}) {
+    constructor({ kmsOpts = {}, dynamoOpts = {} } = {}) {
         _CredStash_kmsClient.set(this, void 0);
         _CredStash_ddb.set(this, void 0);
         this.paddedInt = paddedInt;
@@ -31,10 +31,11 @@ export class CredStash {
             credStash[key] = (...args) => {
                 const lastArg = args.slice(-1)[0];
                 let cb;
-                if (typeof lastArg === 'function') {
+                if (typeof lastArg === "function") {
                     cb = args.pop();
                 }
-                return method.apply(credStash, args)
+                return method
+                    .apply(credStash, args)
                     .then((res) => {
                     if (cb) {
                         return cb(undefined, res);
@@ -81,7 +82,11 @@ export class CredStash {
     }
     async getAllVersions({ name, context, limit, kmsKey, tableName, }) {
         const keyService = new KeyService(__classPrivateFieldGet(this, _CredStash_kmsClient, "f"), kmsKey, context);
-        const { Items = [] } = await __classPrivateFieldGet(this, _CredStash_ddb, "f").getAllVersions({ name, tableName, limit });
+        const { Items = [] } = await __classPrivateFieldGet(this, _CredStash_ddb, "f").getAllVersions({
+            name,
+            tableName,
+            limit,
+        });
         return Promise.all(Items.map(async (record) => ({
             version: record.version,
             secret: await openAesCtrLegacy(keyService, record),
@@ -92,10 +97,16 @@ export class CredStash {
         const keyService = new KeyService(new KMSClient({}), kmsKey, context);
         let record;
         if (version) {
-            ({ Item: record } = await __classPrivateFieldGet(this, _CredStash_ddb, "f").getByVersion({ name, version, tableName }));
+            ({ Item: record } = await __classPrivateFieldGet(this, _CredStash_ddb, "f").getByVersion({
+                name,
+                version,
+                tableName,
+            }));
         }
         else {
-            ({ Items: [record] } = await __classPrivateFieldGet(this, _CredStash_ddb, "f").getLatestVersion({ name, tableName }));
+            ({
+                Items: [record],
+            } = await __classPrivateFieldGet(this, _CredStash_ddb, "f").getLatestVersion({ name, tableName }));
         }
         if (!record || !record.key) {
             throw new Error(`Item {'name': '${name}'} could not be found.`);
@@ -107,7 +118,10 @@ export class CredStash {
         const { Items = [] } = await __classPrivateFieldGet(this, _CredStash_ddb, "f").getAllVersions(opts);
         const results = [];
         for (const secret of Items) {
-            const result = await this.deleteSecret({ name: opts.name, version: secret.version });
+            const result = await this.deleteSecret({
+                ...opts,
+                version: secret.version,
+            });
             results.push(result);
         }
         return results;
@@ -115,7 +129,7 @@ export class CredStash {
     async deleteSecret({ version: origVersion, name, ...opts }) {
         const version = sanitizeVersion(origVersion);
         if (!version) {
-            throw new Error('version is a required parameter');
+            throw new Error("version is a required parameter");
         }
         debug(`Deleting ${name} -- version ${version}`);
         return __classPrivateFieldGet(this, _CredStash_ddb, "f").deleteSecret({ ...opts, name, version });
@@ -135,7 +149,8 @@ export class CredStash {
             .filter((secret) => !startsWith || secret.name.startsWith(startsWith))
             .forEach((next) => {
             position[next.name] = position[next.name]
-                ? position[next.name] : filtered.push(next);
+                ? position[next.name]
+                : filtered.push(next);
         });
         for (const secret of filtered) {
             try {
@@ -149,7 +164,9 @@ export class CredStash {
                 debug(`Ran into some issue ${JSON.stringify(e)}`);
             }
         }
-        Object.keys(unOrdered).sort().forEach((key) => {
+        Object.keys(unOrdered)
+            .sort()
+            .forEach((key) => {
             ordered[key] = unOrdered[key];
         });
         return ordered;
